@@ -1,0 +1,39 @@
+__author__ = "Rabaa"
+__copyright__ = "Copyright 2020"
+__version__ = "1.0.1"
+__maintainer__ = "Rabaa"
+__email__ = "beborabaa@gmail.com"
+
+# Loging in
+For loging in, type the following commands on linux / mac terminal, replacing "yourUsername" with your Uregina username:
+*ssh yourUsername@uregina.ca*
+*ssh user@kozai.campion.uregina.ca*
+Message the author of this file for the password.
+
+
+# Cluster's Architecture
+The cluster is devided into 9 different nodes, with 9 different hostnames.
+*pel1, pel2 ...., pel9*
+Each node is a master node, meaning if one node had a textfile created, all other nodes will have it in display.
+Each node got a *hosts* file, which contains all the IP addresses of all of the nodes.
+
+# Running parallel commands
+A command may be ran on all of the nodes if the command was preceded by:*parallel-ssh -h hosts*
+Requirements for this command is to have the file *hosts* where the command is going to be entered.
+Example run is: *parallel-ssh -h hosts ls*.
+Every node succeded in the command given will show up in the log as successful.
+
+Example for running code: *parallel-ssh -h hosts python Hello.py*
+
+Note that every node is going to be called as of the home directory, so if you are running code from a directory other than the home directory, make sure to navigate the run within the command.
+Example: *parallel-ssh -h hosts python /home/user3/Hello.py*
+
+
+# Fingerprint
+As all of the files will show up in each single node no matter which node made the file, we will have to add a fingerprint to any file the node creates using the code.
+In python, the following commands will take care of the naming:
+*import socket*
+*hostname = socket.gethostname()*
+*TextFile = open("Test_"+ hostname +".out", "w")*
+
+
