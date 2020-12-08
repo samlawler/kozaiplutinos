@@ -1,3 +1,9 @@
+__author__ = "Rabaa"
+__copyright__ = "Copyright 2020"
+__version__ = "1.0.1"
+__maintainer__ = "Rabaa"
+__email__ = "beborabaa@gmail.com"
+
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
