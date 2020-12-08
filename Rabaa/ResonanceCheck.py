@@ -7,8 +7,8 @@ __email__ = "beborabaa@gmail.com"
 import numpy as np
 import sys
 
-
-
+## Class: TestParticle 
+# Functions: Default Constructor, DataDissection, IdentifyResonance, PrintData
 class TestParticle:
     def __init__(self):  # Attributes defined
         self.Resonant = False
@@ -26,6 +26,8 @@ class TestParticle:
 
     ############################################      FUNCTIONS      #################################################
     ############################################   DATA DISSECTION   #################################################
+    # Expects: typeOfData, IndexCount
+    # Will do: Alter the Resonance & Kozai attributes of the class, given the write orbital elements
     def DataDissection(self, typeOfData, IndexCount):
         self.Index = IndexCount
         TestParticleSample = sys.argv[1]  # User to choose a test sample using terminal
@@ -41,9 +43,9 @@ class TestParticle:
              'tp' + TestParticleSample + ".out", unpack=True)
         Longitude = np.genfromtxt(
              "LN.out", usecols= 8,  unpack=True)
-        NumberOfLines = (NumberOfLines / (max(Index)+1)) -1
+        NumberOfLines = (NumberOfLines / (max(Index)+1)) -1 # Dividing the total number of lines by number of test particles, to get steps of one test particle.
 
-
+        # Matching the orbitals with the index we need
         TestParticleTime = TestParticleTime[Index == IndexCount]
         SemiMajorAxis = SemiMajorAxis[Index == IndexCount]
         Eccentricity = Eccentricity[Index == IndexCount]
@@ -54,7 +56,7 @@ class TestParticle:
 
 
 
-
+        # Calculating Lambda, Pomega
         Lambda = (Omega + omega + AngularPosition) % 360  # The Lambda for test particles
         Pomega = (Omega + omega) % 360  # The longitude if pericenter in degrees
 
@@ -72,6 +74,7 @@ class TestParticle:
         Amplitude = -999  # Phi / SMA
         Center = -999  # Phi / SMA
         Name = -999  # Name of the test particle
+        # General flags will be used in the coming loop, Specific flags will then be set at the end, to distinguish Kozai / Resonance
 
         # list of resonances to check: pp and qq for pp:qq resonance
         pp = [2, 3, 3, 4, 4, 5, 5, 5, 5, 6, 7, 7, 7, 7, 8, 8, 9, 9, 9, 10]
@@ -84,7 +87,7 @@ class TestParticle:
             # Searching within 2 AUs from the resonance center
             if IsIt == 0 and (ResSemiMajorAxis + 2) > np.average(SemiMajorAxis) > (ResSemiMajorAxis - 2):
                 phi = (float(pp[jj]) * Lambda - float(qq[jj]) * Longitude - (float(pp[jj]) - float(qq[jj])) * Pomega) % 360
-                AngleRange = np.arange(0, 360, 15)  # Array of angles 5 degrees increment each step
+                AngleRange = np.arange(0, 360, 15)  # Array of angles 15 degrees increment each step
                 Window = int(0)
                 Loop = 0
 
@@ -127,7 +130,7 @@ class TestParticle:
                         MaxCenter = max(CenterArray)
                         MinCenter = min(CenterArray)
 
-                        if (MaxCenter - MinCenter) > 210:
+                        if (MaxCenter - MinCenter) > 210: # If the centers are too large in difference, it is not resonant
                             IsIt = False
                             Amplitude = -999
                             Center = -999
@@ -169,8 +172,8 @@ class TestParticle:
                     else:
                         Amplitude = -999
                         Center = -999
-
-        if typeOfData == 0:
+   
+        if typeOfData == 0: # Type 0 means we are looking if it was Resonant
             IsItResonant = IsIt
             ResonanceAmplitude = Amplitude
             ResonanceCenter = Center
@@ -183,7 +186,7 @@ class TestParticle:
             self.ResonanceCenter = ResonanceCenter
             self.ResonanceType = ResonanceName
 
-        else:
+        else: # Else 1 means we are looking if it was Kozai
             IsItKozai = IsIt
             SMAAmplitude = Amplitude
             SMACenter = Center
@@ -191,20 +194,18 @@ class TestParticle:
             self.Kozai = IsItKozai
             self.SMAamplitude = SMAAmplitude
             self.SMACenter = SMACenter
-
+        # End Else
         self.Name = TestParticleSample
         self.AverageEccentricity = np.average(Eccentricity)
         self.AverageInclination = np.average(Inclination)
         self.AverageSMA = np.average(SemiMajorAxis)
 
-        #sns.set_style('dark')
-        #palette = sns.color_palette("mako", as_cmap=True)
-        #sns.set_palette("dark", 10)
-        #sns.relplot(x=TestParticleTime, y=omega)
-        #plt.show()
+
         return
 
     ############################################   IDENTIFY RESONANCE   ##############################################
+    # Expects: IndexCount
+    # Will do: First call to function DataDissection to check if resonant, if resonant, will do second call to check for Kozai
     def IdentifyResonance(self, IndexCount):
         type = 0  # Indicated that the variable Resonant is what we want from DataDissection function
         self.DataDissection(type, IndexCount)
@@ -213,7 +214,9 @@ class TestParticle:
             self.DataDissection(type, IndexCount)
 
     ##############################################      PRINT DATA      ##############################################
-    def PrintData(self, IndexCount ):  # To be changed to SetData at the end of the project
+    # Expects: IndexCount
+    # Will do: Print Data Into a '.out' file Names tp + 'number you entered' + .out
+    def PrintData(self, IndexCount ):
         TestParticleSample = sys.argv[1]
         TestParticleTime, Index, SemiMajorAxis, Eccentricity, Inclination, Omega, omega, AngularPosition, Longitude = np.genfromtxt(
             "tp" + TestParticleSample + ".out", unpack=True)
@@ -221,20 +224,20 @@ class TestParticle:
         TextFile.write((str(self.Index) + " " +str(SemiMajorAxis[IndexCount]) + " " + str(Eccentricity[IndexCount]) + " " + str(Inclination[IndexCount]) + " " + str(Omega[IndexCount]) + " " + str(omega[IndexCount]) + " " + str(AngularPosition[IndexCount]) + " " + str(self.Name) + " " + str(self.AverageSMA) + " " + str(self.AverageEccentricity) + " " + str(self.AverageInclination) + " " + str(self.ResonanceCenter) + " " + str(self.ResonanceAmplitude) + " " + str(self.SMACenter) + " " + str(self.SMAamplitude) + " " + '\n'))
 
 
-
+# Main function
 if __name__ == '__main__':
-    TestParticleSample = sys.argv[1]
+    TestParticleSample = sys.argv[1] # User to enter the number indicating the file number
     Index = np.genfromtxt('tp' + TestParticleSample + ".out", usecols=1, unpack=True)
-    NumberOfTPs = max(Index)
+    NumberOfTPs = max(Index) # Assuming there is more than one Testparticle, all with different timesteps, in the same file
     TextFile = open("TestParticleResonance"+ TestParticleSample +".out", "a+")
     TextFile.write("# SMA0  Ecc0  Inc0  Node0  ArgPeri0  MeanAnom0  Name  AverageSMA  AverageEcc  AverageInc  LibrationCenter  LibrationAmp  KozaiCenter  KozaiAmp" + '\n')
     IndexCount = 0
     for IndexCount in range(0, int(NumberOfTPs)+1 ):
-        Tp = TestParticle()
-        Tp.IdentifyResonance(IndexCount)
+        Tp = TestParticle() # Initialise the test particle
+        Tp.IdentifyResonance(IndexCount) # Identify its resonant / kozai status
 
-        Tp.PrintData(IndexCount)
-    print(TestParticleSample)
+        Tp.PrintData(IndexCount) # print the results
+    print(TestParticleSample) # ensure it is done
 
 
 
